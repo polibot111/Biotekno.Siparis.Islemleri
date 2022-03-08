@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Biotekno.Data\Biotekno.Data.csproj" />
     <ProjectReference Include="..\Biotekno.Entities\Biotekno.Entities.csproj" />
     <ProjectReference Include="..\Biotekno.Shared\Biotekno.Shared.csproj" />
