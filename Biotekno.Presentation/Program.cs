@@ -42,6 +42,7 @@ try
     });
 
 
+    builder.Services.AddMemoryCache();
 
 
     //AddScoped Finish

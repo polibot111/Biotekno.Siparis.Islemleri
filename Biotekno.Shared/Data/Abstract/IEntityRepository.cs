@@ -15,5 +15,7 @@ namespace Biotekno.Shared.Data.Abstract
 
         Task AddAsync(T entity);
 
+        void SaveChanges();
+
     }
 }

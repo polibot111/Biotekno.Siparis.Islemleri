@@ -18,7 +18,7 @@ namespace Biotekno.Shared.Concrete.Ef
         }
         public async Task AddAsync(T entity)
         {
-            await _context.Set<T>().AddAsync(entity);
+           await _context.Set<T>().AddAsync(entity);
         }
 
         public async Task<IList<T>> GetAllAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> includeProperties)
@@ -49,6 +49,11 @@ namespace Biotekno.Shared.Concrete.Ef
                 query = query.Include(includeProperties);
             }
             return await query.SingleOrDefaultAsync();
+        }
+
+        public void SaveChanges()
+        {
+            _context.SaveChanges();
         }
     }
 }

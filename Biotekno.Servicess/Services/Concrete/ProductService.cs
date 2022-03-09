@@ -6,6 +6,7 @@ using Biotekno.Entities.Entities;
 using Biotekno.Servicess.Services.Abstract;
 using Biotekno.Shared.Utilities.Results.Concrete;
 using Biotekno.Shared.Utilities.Results.Enum;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -21,19 +22,30 @@ namespace Biotekno.Servicess.Services.Concrete
         private readonly IProductRepository _productRepository;
         private readonly ILogger<ProductService> _logger;
         private readonly IMapper _mapper;
-        public ProductService(IProductRepository productRepository, ILogger<ProductService> logger, IMapper mapper)
+        private readonly IMemoryCache _cache;
+
+        private string cacheKey = "productKey";
+        public ProductService(IProductRepository productRepository, ILogger<ProductService> logger, IMapper mapper, IMemoryCache cache)
         {
             _productRepository = productRepository;
             _logger = logger;
             _mapper = mapper;
+            _cache = cache;
         }
         public async Task<ServiceResult<List<ProductDTO>>> GetListProduct(ProductQuery product, CancellationToken cancellationToken)
         {
             ServiceResult<List<ProductDTO>> service = new ServiceResult<List<ProductDTO>>();
-            List<ProductDTO> productDTOs = new List<ProductDTO>(); 
+            List<ProductDTO> productDTOs = new List<ProductDTO>();
             try
             {
-                var products = await _productRepository.GetAllAsync(x=>x.Category == product.Category,null);
+                var products = _cache.Get<IList<Product>>(cacheKey);
+                if (products is null)
+                {
+                    products = await _cache.Set(cacheKey, 
+                    _productRepository.GetAllAsync(x => x.Category == product.Category, null), 
+                    TimeSpan.FromMinutes(1));
+                }
+
                 var productsDTOs = _mapper.Map<List<ProductDTO>>(products);
                 service.Data = productDTOs;
                 service.ResultMessage = "Success";
@@ -50,12 +62,12 @@ namespace Biotekno.Servicess.Services.Concrete
                     w32ex = ex.InnerException as Win32Exception;
                 }
                 w32ex = ex.InnerException as Win32Exception;
-                service.ResultMessage = "Success";
+                service.ResultMessage = ex.ToString();
                 service.ErrorCode = $"{w32ex.ErrorCode}";
                 service.Status = Status.Failed;
                 return service;
             }
-         
+
         }
     }
 }
